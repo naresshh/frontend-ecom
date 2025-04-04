@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useCart } from "./CartContext";
 import { useError } from '../Context/ErrorContext.jsx';
+import {useAuth} from '../Context/AuthContext.jsx';
 
 const HomeComponent = () => {
     const [categories, setCategories] = useState([]);
@@ -13,8 +14,9 @@ const HomeComponent = () => {
     const { cartItems, dispatch } = useCart(); 
     const [message, setMessage] = useState(""); 
     const { setError } = useError();
-    const customerId = 1;
-
+    const { auth } = useAuth();
+    const customerId = auth.userId;
+    console.log('Home Component CustomerId' +customerId);
     useEffect(() => {
         refreshCart(); 
     }, []);
@@ -29,7 +31,7 @@ const HomeComponent = () => {
     }, []);
 
     useEffect(() => {
-        refreshCart();  // ✅ Fetch the cart on mount
+        refreshCart();
     }, []);
 
     const handleCategoryChange = (event) => {
@@ -57,10 +59,10 @@ const HomeComponent = () => {
 
     const addToCart = (product) => {
         axios.post("http://localhost:8082/cart/add", { 
-            productId: product.productId, quantity: 1, customerId: 1 
+            productId: product.productId, quantity: 1, customerId: customerId 
         })
         .then(() => {
-            setMessage(`${product.productTitle} added to cart!`);
+            setMessage(`${quantity} ${product.productTitle} added to cart!`);
             refreshCart();
         })
         .catch(error => {
@@ -70,6 +72,7 @@ const HomeComponent = () => {
     };
 
     const refreshCart = () => {
+        console.log('failed' +customerId);
         axios.get(`http://localhost:8082/cart/${customerId}`)
             .then(response => dispatch({ type: "SET_CART", payload: response.data }))
             .catch(error => {
@@ -81,7 +84,7 @@ const HomeComponent = () => {
     const increaseQuantity = (productId, quantity, productTitle, priceUnit) => {
 
         const cartItem = cartItems.find(item => item.productId === productId);
-    
+        console.log('cartItem '+cartItem);
         if (cartItem) {
             axios.put(`http://localhost:8082/cart/update/${cartItem.customerId}/${cartItem.productId}?quantity=${quantity + 1}`)
                 .then(() => {
@@ -113,7 +116,7 @@ const decreaseQuantity = (productId, quantity, productTitle, priceUnit) => {
 
     if (cartItem) {
         if (quantity > 1) {
-            axios.put(`http://localhost:8082/cart/update/${cartItem.id}?quantity=${quantity - 1}`)
+            axios.put(`http://localhost:8082/cart/update/${cartItem.customerId}/${cartItem.productId}?quantity=${quantity - 1}`)
                 .then(() => {
                     dispatch({ type: "UPDATE_QUANTITY", payload: { productId, quantity: quantity - 1 } });
                     refreshCart();

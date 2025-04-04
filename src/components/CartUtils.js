@@ -1,12 +1,13 @@
 import axios from "axios";
 
+
 // Common function to update the cart quantity
 export const updateCartQuantity = (cartItems, productId, quantity, dispatch, customerId) => {
     const cartItem = cartItems.find(item => item.productId === productId);
     console.log("CartItem found:", cartItem); // Debug log
 
     if (cartItem) {
-        alert('Entering quantity update function');
+        //alert('Entering quantity update function');
         console.log("Updating quantity for:", cartItem);
         if (quantity > 0) {
             axios.put(`http://localhost:8082/cart/update/${cartItem.customerId}/${cartItem.productId}?quantity=${quantity}`)
@@ -18,7 +19,7 @@ export const updateCartQuantity = (cartItems, productId, quantity, dispatch, cus
                 .catch(error => console.error("Error updating quantity:", error));
         } else {
             // If quantity is zero, remove item from cart
-            axios.delete(`http://localhost:8082/cart/delete/${cartItem.productId}`)
+            axios.delete(`http://localhost:8082/cart/delete/${cartItem.id}`)
                 .then(() => {
                     dispatch({ type: "REMOVE_FROM_CART", payload: productId });
                     refreshCart(dispatch, customerId);

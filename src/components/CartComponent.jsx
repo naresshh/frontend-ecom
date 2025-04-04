@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useCart } from './CartContext';
 import { updateCartQuantity } from './CartUtils.js';
 import { useError } from '../Context/ErrorContext.jsx';
+import {useAuth} from '../Context/AuthContext.jsx';
 
 import axios from "axios";
 
@@ -9,13 +10,15 @@ const CartComponent = () => {
     const { cartItems, dispatch } = useCart();
     const [message, setMessage] = useState("");
     const { setError } = useError(); 
-    const customerId = 1;
+    const { auth } = useAuth();
+    const customerId = auth.userId;
 
     // **Handle Remove from Cart**
     const removeFromCart = (productId, productTitle) => {
         axios.delete(`http://localhost:8082/cart/delete/${productId}`)
             .then(() => {
                 setMessage(`${productTitle} removed from cart!`);
+                dispatch({ type: "REMOVE_FROM_CART", payload: productId });
                 refreshCart();
             })
             .catch(error => {

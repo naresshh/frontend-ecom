@@ -3,6 +3,8 @@ import axios from "axios";
 import { useCart } from "./CartContext";
 import { useError } from '../Context/ErrorContext.jsx';
 import {useAuth} from '../Context/AuthContext.jsx';
+import { useNavigate } from "react-router-dom";
+
 
 const HomeComponent = () => {
     const [categories, setCategories] = useState([]);
@@ -16,6 +18,9 @@ const HomeComponent = () => {
     const { setError } = useError();
     const { auth } = useAuth();
     const customerId = auth.userId;
+    const isAdmin = auth?.roles?.includes("ROLE_ADMIN");
+    const navigate = useNavigate();
+
     console.log('Home Component CustomerId' +customerId);
     useEffect(() => {
         refreshCart(); 
@@ -58,6 +63,7 @@ const HomeComponent = () => {
     };
 
     const addToCart = (product) => {
+        if (!customerId) return;
         axios.post("http://localhost:8082/cart/add", { 
             productId: product.productId, quantity: 1, customerId: customerId 
         })
@@ -67,12 +73,13 @@ const HomeComponent = () => {
         })
         .catch(error => {
             console.error("Error adding to cart:", error);
-            setError("Failed to add product to cart. Please try again later.");
+            setError("Failed to add product to cart. Please login.");
         });
     };
 
     const refreshCart = () => {
         console.log('failed' +customerId);
+        if (!customerId) return;
         axios.get(`http://localhost:8082/cart/${customerId}`)
             .then(response => dispatch({ type: "SET_CART", payload: response.data }))
             .catch(error => {
@@ -106,7 +113,7 @@ const HomeComponent = () => {
             })
             .catch(error => {
                 console.error("Error adding to cart:", error);
-                setError("Failed to add product to cart. Please try again later.");
+                setError("Failed to add product to cart. Please login.");
             });
         }
     };
@@ -197,6 +204,24 @@ const decreaseQuantity = (productId, quantity, productTitle, priceUnit) => {
                     </ul>
                 </>
             )}
+            {isAdmin && (
+  <div style={{ marginBottom: "20px" }}>
+    <button 
+      onClick={() => navigate("/inventory")} 
+      style={{
+        padding: "10px 20px",
+        backgroundColor: "#007BFF",
+        color: "white",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer"
+      }}
+    >
+      Manage Inventory
+    </button>
+  </div>
+)}
+
             {message && <p style={{ color: "green", fontWeight: "bold" }}>{message}</p>}
         </div>
     );

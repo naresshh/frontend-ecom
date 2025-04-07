@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
+
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     isAuthenticated: false,
@@ -50,6 +51,8 @@ export const AuthProvider = ({ children }) => {
       roles: [],
       userId: null,
     });
+    const logoutEvent = new CustomEvent("logout");
+    window.dispatchEvent(logoutEvent);
   };
 
   return (

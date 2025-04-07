@@ -35,6 +35,9 @@ const cartReducer = (state, action) => {
                 ),
             };
 
+            case "CLEAR_CART":
+                return { ...state, cartItems: [] };
+
         default:
             return state;
     }
@@ -54,6 +57,7 @@ export const CartProvider = ({ children }) => {
 
     // Fetch Cart from API on mount
     useEffect(() => {
+        if (!customerId) return;
         const fetchCart = () => {
             axios.get(`http://localhost:8082/cart/${customerId}`) // Adjust customerId dynamically based on user login
                 .then(response => dispatch({ type: "SET_CART", payload: response.data }))
@@ -61,11 +65,16 @@ export const CartProvider = ({ children }) => {
         };
 
         fetchCart();
-        
+
+        const handleLogout = () => dispatch({ type: "CLEAR_CART" });
+        window.addEventListener("logout", handleLogout);
         // Optional: Sync across tabs
         window.addEventListener("storage", fetchCart);
-        return () => window.removeEventListener("storage", fetchCart);
-    }, []);
+        return () => {
+            window.removeEventListener("logout", handleLogout);
+            window.removeEventListener("storage", fetchCart);
+          };
+        }, [customerId]);
 
     return (
         <CartContext.Provider value={{ cartItems: state.cartItems, dispatch }}>

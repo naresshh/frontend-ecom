@@ -3,7 +3,7 @@ import { useCart } from './CartContext';
 import { updateCartQuantity } from './CartUtils.js';
 import { useError } from '../Context/ErrorContext.jsx';
 import {useAuth} from '../Context/AuthContext.jsx';
-
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const CartComponent = () => {
@@ -12,6 +12,7 @@ const CartComponent = () => {
     const { setError } = useError(); 
     const { auth } = useAuth();
     const customerId = auth.userId;
+    const navigate = useNavigate();
 
     // **Handle Remove from Cart**
     const removeFromCart = (productId, productTitle) => {
@@ -103,6 +104,16 @@ const CartComponent = () => {
                 </div>
             )}
 
+{cartItems.length > 0 && (
+    <div style={{ marginTop: "20px" }}>
+        <button onClick={() => navigate("/checkout")} style={{ marginRight: "10px" }}>
+            Proceed to Checkout
+        </button>
+        <button onClick={() => navigate("/")}>
+            Continue Shopping
+        </button>
+    </div>
+)}
             {/* Success Message */}
             {message && <p style={{ color: "red", fontWeight: "bold" }}>{message}</p>}
         </div>
